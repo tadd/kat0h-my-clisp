@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-O0 -ggdb3
+CFLAGS=-O3 -flto=auto -fno-omit-frame-pointer -ggdb3
 OBJS=main.o continuation.o
 
 all: scm
@@ -10,6 +10,9 @@ all: scm
 scm: $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
+test: scm
+	./$< "`cat sample/callcc.scm`"
+
 clean:
 	rm -f *.o scm
 
@@ -18,4 +21,4 @@ clean:
 
 analyze: $(OBJS:.o=.analyze)
 
-.PHONY: clean analyze
+.PHONY: clean analyze test
