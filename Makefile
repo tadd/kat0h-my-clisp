@@ -1,8 +1,21 @@
-all: main.o
-	cc -o scm main.o continuation.o
-main.o: main.c continuation.o
-	cc -c main.c
-continuation.o: continuation.c
-	cc -c continuation.c
+CC=clang
+CFLAGS=-O0 -ggdb3
+OBJS=main.o continuation.o
+
+all: scm
+
+%.o: %.c continuation.h
+	$(CC) $(CFLAGS) -c $<
+
+scm: $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
 clean:
-	rm -rf main.o scm
+	rm -f *.o scm
+
+%.analyze: %.c
+	$(CC) $(CFLAGS) --analyze -c $< -o /dev/null
+
+analyze: $(OBJS:.o=.analyze)
+
+.PHONY: clean analyze
