@@ -2,12 +2,11 @@
 #include <setjmp.h>
 #include "continuation.h"
 static void *main_rbp;
-static void *e_expr;
 
 void init_continuation(void *rbp) {
   main_rbp = rbp;
 }
-void *get_continuation(continuation *c) {
+int get_continuation(continuation *c) {
   void *rsp;
   GETRSP(rsp);
   c->rsp = rsp;
@@ -17,25 +16,21 @@ void *get_continuation(continuation *c) {
   char *src = c->rsp;
   for (int i = c->stacklen; 0 <= --i;)
     *dst++ = *src++;
-  if (setjmp(c->cont_reg) == 0)
-    return NULL;
-  else
-   return e_expr;
+  return setjmp(c->cont_reg);
 }
-void _cc(continuation *c, void *expr) {
+void _cc(continuation *c, int val) {
   char *dst = c->rsp;
   char *src = c->stack;
   for (int i = c->stacklen; 0 <= --i;)
     *dst++ = *src++;
-  e_expr = expr;
-  longjmp(c->cont_reg, 1);
+  longjmp(c->cont_reg, val);
 }
-void call_continuation(continuation *c, void *expr) {
+void call_continuation(continuation *c, int val) {
   volatile void *q = 0;
   do {
-    q=alloca(16);
+    q=alloca(8);
   } while (q > c->rsp);
-  _cc(c, expr);
+  _cc(c, val);
 }
 void free_continuation(continuation *c) {
   free(c->stack);
