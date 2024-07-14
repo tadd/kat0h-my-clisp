@@ -905,7 +905,7 @@ frame *mk_initial_env() {
 }
 void repl() {
   puts("kat0h's scheme");
-  char buf[1024];
+  static char buf[1024];
   frame *environ = mk_initial_env();
   printf("scm> ");
   while (fgets(buf, 1024, stdin) != NULL) {
