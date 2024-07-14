@@ -24,10 +24,13 @@ void _cc(continuation *c, void *expr) {
   longjmp(c->cont_reg, 1);
 }
 void call_continuation(continuation *c, void *expr) {
-  volatile void *q = 0;
-  do {
-    q=alloca(16);
-  } while (q > c->rsp);
+  char base = 0;
+  volatile void *q = &base;
+  int i = 1;
+  if (q > c->rsp) {
+      i = (q - c->rsp) % 64U + 1;
+  }
+  volatile void *p = alloca(64*i);
   _cc(c, expr);
 }
 void free_continuation(continuation *c) {
