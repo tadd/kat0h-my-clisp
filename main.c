@@ -913,7 +913,7 @@ void repl() {
   }
 }
 
-volatile void *main_rbp;
+void *main_rbp;
 
 int main(int argc, char *argv[]) {
   INIT_CONTINUATION();

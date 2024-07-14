@@ -5,18 +5,18 @@
 #include <setjmp.h>
 #include <stddef.h>
 typedef struct {
-  volatile void *stack;
+  void *stack;
   unsigned long stacklen;
-  volatile void *rsp;
+  void *rsp;
   jmp_buf cont_reg;
 } continuation;
 
-void init_continuation(volatile void *rbp);
+void init_continuation(void *rbp);
 #define GETRSP(rsp) asm volatile("mov %%rsp, %0" : "=r"(rsp));
 #define GETRBP(rbp) asm volatile("mov %%rbp, %0" : "=r"(rbp));
 #define INIT_CONTINUATION()                                                    \
   {                                                                            \
-    volatile char base = 0;                                                    \
+    int base = 0;                                                              \
     main_rbp = &base;                                                          \
   }
 void *get_continuation(continuation *c);
