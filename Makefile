@@ -1,11 +1,27 @@
 CC = gcc
-all: main.o continuation.o
-	$(CC) -o scm main.o continuation.o
-main.o: main.c main.h continuation.o
-	$(CC) -c main.c
-continuation.o: continuation.c continuation.h
-	$(CC) -c continuation.c
+CFLAGS=-O0 -ggdb3
+OBJS=main.o continuation.o
+
+all: scm
+
+scm: $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+main.o: main.h
+continuation.o: continuation.h
+
 clean:
-	rm -rf main.o scm
+	rm -f *.o scm
+
 tags:
 	ctags -R .
+
+%.analyze: %.c
+	$(CC) $(CFLAGS) --analyze -c $< -o /dev/null
+
+analyze: $(OBJS:.o=.analyze)
+
+.PHONY: all clean tags analyze
