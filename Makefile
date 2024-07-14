@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-O0 -ggdb3
+CFLAGS=-O3 -flto=auto -fno-omit-frame-pointer -ggdb3
 OBJS=continuation.o main.o
 
 all: lisp
@@ -10,6 +10,9 @@ all: lisp
 lisp: $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
+test: lisp
+	./lisp "`cat sample/callcc.scm`"
+
 clean:
 	rm -f *.o lisp
 
@@ -18,4 +21,4 @@ clean:
 
 analyze: $(OBJS:.o=.analyze)
 
-.PHONY: clean analyze
+.PHONY: clean analyze test
