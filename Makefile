@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-O0 -ggdb3
+CFLAGS=-O3 -ggdb3
 OBJS=continuation.o main.o
 
 all: lisp

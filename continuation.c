@@ -1,25 +1,28 @@
 #include <stdlib.h>
 #include <string.h>
 #include <setjmp.h>
+#include <string.h>
 #include "continuation.h"
-static void *main_rbp;
+extern volatile void *main_rbp;
 static void *e_expr;
 
-void init_continuation(void *rbp) {
+void *xmalloc(size_t size);
+
+void init_continuation(volatile void *rbp) {
   main_rbp = rbp;
 }
 void *get_continuation(continuation *c) {
   GETRSP(c->rsp);
   c->stacklen = main_rbp - c->rsp + 1;
-  c->stack = malloc(c->stacklen);
-  memmove(c->stack, c->rsp, c->stacklen);
+  c->stack = xmalloc(c->stacklen);
+  memmove((void *) c->stack, (void *) c->rsp, c->stacklen);
   if (setjmp(c->cont_reg) == 0)
     return NULL;
   else
    return e_expr;
 }
 void _cc(continuation *c, void *expr) {
-  memmove(c->rsp, c->stack, c->stacklen);
+  memmove((void *) c->rsp, (void *) c->stack, c->stacklen);
   e_expr = expr;
   longjmp(c->cont_reg, 1);
 }
@@ -33,6 +36,7 @@ void call_continuation(continuation *c, void *expr) {
   volatile void *p = alloca(64*i);
   _cc(c, expr);
 }
+
 void free_continuation(continuation *c) {
-  free(c->stack);
+  free((void *) c->stack);
 }

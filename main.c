@@ -912,6 +912,9 @@ void repl() {
     printf("scm> ");
   }
 }
+
+volatile void *main_rbp;
+
 int main(int argc, char *argv[]) {
   INIT_CONTINUATION();
   if (argc < 2) {
