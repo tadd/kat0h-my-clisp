@@ -19,8 +19,8 @@ void init_continuation(void *rbp);
     GETRBP(main_rbp);                                                          \
     init_continuation(main_rbp);                                               \
   }
-void *get_continuation(continuation *c);
-void call_continuation(continuation *c, void *expr);
+int get_continuation(continuation *c);
+void call_continuation(continuation *c, int val);
 void free_continuation(continuation *c);
 expr *mk_continuation_expr(continuation *cont);
 expr *ifunc_callcc(expr *args, frame *env);
