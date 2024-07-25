@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Og -ggdb3
+CFLAGS=-Og -ggdb3 $(XCFLAGS)
 OBJS=main.o
 
 all: lisp
