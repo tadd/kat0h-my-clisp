@@ -811,7 +811,7 @@ void *get_continuation(continuation *c) {
   GETRSP(rsp);
   c->rsp = rsp;
   c->stacklen = main_rbp - rsp + 1;
-  c->stack = malloc(sizeof(char) * c->stacklen);
+  c->stack = xmalloc(sizeof(char) * c->stacklen);
   char *dst = c->stack;
   char *src = c->rsp;
   for (int i = c->stacklen; 0 <= --i;)
