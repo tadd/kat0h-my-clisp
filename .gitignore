@@ -3,3 +3,4 @@ tags
 .vscode
 *.o
 lisp
+lisp-ubsan
