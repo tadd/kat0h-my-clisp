@@ -240,7 +240,7 @@ expr *parse_hash_literal() {
     throw("parse error: unexpected token %c", *input);
   }
 }
-expr *parse_list();
+expr *parse_list(void);
 expr *parse_expr() {
 #ifdef DEBUG
   printf("parse_expr: %s\n", input);
