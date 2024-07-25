@@ -97,15 +97,15 @@ void init_continuation(void *rbp);
 #define GETRSP(rsp) asm volatile("mov %%rsp, %0" : "=r"(rsp));
 #define GETRBP(rbp) asm volatile("mov %%rbp, %0" : "=r"(rbp));
 #define INIT_CONTINUATION()                                                    \
-  {                                                                            \
-    void *main_rbp;                                                            \
-    GETRBP(main_rbp);                                                          \
-    init_continuation(main_rbp);                                               \
-  }
+    void *rbp;                                                            \
+    GETRBP(rbp);                                                          \
+    fprintf(stderr, "main_rbp: %p\n", rbp); \
+    init_continuation(rbp);
+
 void *get_continuation(continuation *c);
 void call_continuation(continuation *c, void *expr);
 void free_continuation(continuation *c);
-static void *main_rbp;
+static volatile void *main_rbp;
 // 継続の返り値を受け渡すための変数
 static void *e_expr;
 
@@ -476,7 +476,6 @@ expr *eval(expr *exp, frame *env) {
 }
 
 expr *eval_top(expr *exp, frame *env) {
-  INIT_CONTINUATION();
   return eval(exp, env);
 }
 
@@ -508,7 +507,8 @@ expr *eval_cell(expr *exp, frame *env) {
       throw("call/cc error: invalid number of arguments");
     if (cell_len(E_CELL(args)) == 0)
       call_continuation(cont, mk_empty_cell_expr());
-    call_continuation(cont, eval(CAR(args), env));
+    else //if (cell_len(E_CELL(args)) == 1)
+      call_continuation(cont, eval(CAR(args), env));
   }
   throw("call error: not callable");
 }
@@ -822,6 +822,7 @@ void *get_continuation(continuation *c) {
   GETRSP(rsp);
   c->rsp = rsp;
   c->stacklen = main_rbp - rsp + 1;
+  fprintf(stderr, "stacklen: %lu\n", c->stacklen);
   c->stack = xmalloc(sizeof(char) * c->stacklen);
   MEMMOVE(c->stack, c->rsp, c->stacklen);
   if (setjmp(c->cont_reg) == 0)
@@ -849,6 +850,7 @@ expr *ifunc_callcc(expr *args, frame *env) {
   if (TYPEOF(lmd) != LAMBDA)
     throw("call/cc error: not lambda");
   continuation *cont = xmalloc(sizeof(continuation));
+  memset(cont, 0, sizeof(continuation));
   expr *r = get_continuation(cont);
   if (r == NULL) {
     // lambdaにcontinuationを渡して実行
@@ -928,6 +930,7 @@ void repl() {
   }
 }
 int main(int argc, char *argv[]) {
+  INIT_CONTINUATION();
   if (argc < 2) {
     if (isatty(fileno(stdin)))
       repl();
