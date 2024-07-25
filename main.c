@@ -26,7 +26,7 @@ void *xmalloc(size_t size) {
   //   throw("Internal Error xmalloc");
   // }
   if (p == NULL) {
-    throw("malloc failed");
+    throw("malloc(%zu) failed", size);
   }
   return p;
 }
