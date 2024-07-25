@@ -1,6 +1,6 @@
 CC=clang
-CFLAGS=-Og -ggdb3 -fno-omit-frame-pointer $(XCFLAGS)
-ubsan_flags=-fsanitize=undefined,address -fomit-frame-pointer -O2
+CFLAGS=-Og -ggdb3 $(XCFLAGS) #-fno-omit-frame-pointer
+ubsan_flags=-fsanitize=undefined,address -O2 #-fomit-frame-pointer
 OBJS=main.o
 
 all: lisp
