@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <alloca.h>
 #include <setjmp.h>
 #include <stdarg.h>
@@ -97,11 +98,9 @@ void init_continuation(void *rbp);
 #define GETRSP(rsp) asm volatile("mov %%rsp, %0" : "=r"(rsp));
 #define GETRBP(rbp) asm volatile("mov %%rbp, %0" : "=r"(rbp));
 #define INIT_CONTINUATION()                                                    \
-  {                                                                            \
-    void *main_rbp;                                                            \
-    GETRBP(main_rbp);                                                          \
-    init_continuation(main_rbp);                                               \
-  }
+    int top = 0;\
+    init_continuation(&top);                                               \
+
 void *get_continuation(continuation *c);
 void call_continuation(continuation *c, void *expr);
 void free_continuation(continuation *c);
@@ -448,6 +447,7 @@ expr *eval(expr *exp, frame *env) {
   if (exp == NULL) {
     throw("eval error: exp is NULL");
   }
+  assert(env > (frame*)1000U);
   switch (TYPEOF(exp)) {
   case NUMBER:
     // NUMBERはそれ以上評価できない終端の値
@@ -476,7 +476,6 @@ expr *eval(expr *exp, frame *env) {
 }
 
 expr *eval_top(expr *exp, frame *env) {
-  INIT_CONTINUATION();
   return eval(exp, env);
 }
 
@@ -488,6 +487,7 @@ expr *eval_cell(expr *exp, frame *env) {
   if (TYPEOF(exp) != CELL) {
     throw("eval error: exp is not CELL");
   }
+  assert(env > (frame*)1000U);
   // 空リストは妥当な式ではない
   if (E_CELL(exp) == NULL) {
     return exp;
@@ -530,6 +530,7 @@ expr *eval_lambda(lambda *f, cell *args, frame *env) {
 
 // internal func
 expr *ifunc_add(expr *args, frame *env) {
+    assert(env > (frame*)1000U);
   float sum = 0;
   while (E_CELL(args) != NULL) {
     expr *i = eval(CAR(args), env);
@@ -811,17 +812,24 @@ expr *ifunc_cons(expr *args, frame *env) {
   expr *cdr = eval(CAR(CDR(args)), env);
   return mk_cell_expr(car, cdr);
 }
+void init_continuation(void *rbp) {
+    main_rbp = rbp;
+    fprintf(stderr, "init: main_rbp: %p\n", main_rbp);
+}
 #define MEMMOVE(dst, src, n) do { \
         uint8_t *d = dst, *s = src; \
         for (int i = n; i > 0; i--) \
             *d++ = *s++; \
     } while (0)
-void init_continuation(void *rbp) { main_rbp = rbp; }
 void *get_continuation(continuation *c) {
   void *rsp;
   GETRSP(rsp);
   c->rsp = rsp;
+  fprintf(stderr, "get: main_rbp: %p\n", main_rbp);
+  assert(main_rbp > (void*)1024U);
+  assert(rsp > (void*)1024U);
   c->stacklen = main_rbp - rsp + 1;
+  assert(c->stacklen < 1000000);
   c->stack = xmalloc(sizeof(char) * c->stacklen);
   MEMMOVE(c->stack, c->rsp, c->stacklen);
   if (setjmp(c->cont_reg) == 0)
@@ -928,6 +936,7 @@ void repl() {
   }
 }
 int main(int argc, char *argv[]) {
+  INIT_CONTINUATION();
   if (argc < 2) {
     if (isatty(fileno(stdin)))
       repl();
