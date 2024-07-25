@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Og -ggdb3 $(XCFLAGS)
+CFLAGS = -Og -ggdb3 -fno-omit-frame-pointer $(XCFLAGS)
 OBJS = main.o continuation.o
 
 all: scm
