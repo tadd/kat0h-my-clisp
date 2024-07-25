@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Og -ggdb3
+CFLAGS = -Og -ggdb3 $(XCFLAGS)
 OBJS = main.o continuation.o
 
 all: scm
