@@ -8,6 +8,7 @@
 
 #define SYMBOL_LEN_MAX 256
 // #define DEBUG
+// #define MEM_FREE
 
 // utils
 // https://github.com/tadd/my-c-lisp
@@ -17,14 +18,18 @@
             __func__ __VA_OPT__(, ) __VA_ARGS__);                              \
     exit(1);                                                                   \
   }
+#ifdef MEM_FREE
 size_t MEMP = 0;
 void *MEM[1000000] = {0};
+#endif
 void *xmalloc(size_t size) {
   void *p = malloc(size);
-  // MEM[MEMP++] = p;
-  // if (MEMP == 1000000) {
-  //   throw("Internal Error xmalloc");
-  // }
+#ifdef MEM_FREE
+  MEM[MEMP++] = p;
+  if (MEMP == 1000000) {
+    throw("Internal Error xmalloc");
+  }
+#endif
   if (p == NULL) {
     throw("malloc(%zu) failed", size);
   }
@@ -934,6 +939,8 @@ int main(int argc, char *argv[]) {
     eval_list(program, environ, mk_empty_cell_expr());
   }
 
+#ifdef MEM_FREE
   for (int i = 0; i < MEMP; i++)
     free(MEM[i]);
+#endif
 }
