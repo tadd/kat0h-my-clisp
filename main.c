@@ -817,20 +817,14 @@ void *get_continuation(continuation *c) {
   c->rsp = rsp;
   c->stacklen = main_rbp - rsp + 1;
   c->stack = xmalloc(sizeof(char) * c->stacklen);
-  char *dst = c->stack;
-  char *src = c->rsp;
-  for (int i = c->stacklen; 0 <= --i;)
-    *dst++ = *src++;
+  memmove(c->stack, c->rsp, c->stacklen);
   if (setjmp(c->cont_reg) == 0)
     return NULL;
   else
     return e_expr;
 }
 void _cc(continuation *c, void *expr) {
-  char *dst = c->rsp;
-  char *src = c->stack;
-  for (int i = c->stacklen; 0 <= --i;)
-    *dst++ = *src++;
+  memmove(c->rsp, c->stack, c->stacklen);
   e_expr = expr;
   longjmp(c->cont_reg, 1);
 }
