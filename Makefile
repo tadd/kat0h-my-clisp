@@ -8,6 +8,9 @@ all: scm
 scm: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
+test:
+	sample/test.sh
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<
 
@@ -32,4 +35,4 @@ analyze: $(OBJS:.o=.analyze)
 tags:
 	ctags -R .
 
-.PHONY: clean analyze ubsan
+.PHONY: clean analyze ubsan test
