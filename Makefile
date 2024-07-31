@@ -5,6 +5,9 @@ OBJS=main.o
 
 all: lisp
 
+test:
+	sample/test.sh
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $<
 
@@ -26,4 +29,4 @@ clean:
 
 analyze: $(OBJS:.o=.analyze)
 
-.PHONY: clean analyze ubsan
+.PHONY: clean analyze ubsan test
