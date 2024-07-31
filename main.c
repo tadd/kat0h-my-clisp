@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -810,6 +811,11 @@ expr *ifunc_cons(expr *args, frame *env) {
   expr *cdr = eval(CAR(CDR(args)), env);
   return mk_cell_expr(car, cdr);
 }
+#define MEMMOVE(dst, src, n) do { \
+        uint8_t *d = dst, *s = src; \
+        for (int i = n; i > 0; i--) \
+            *d++ = *s++; \
+    } while (0)
 void init_continuation(void *rbp) { main_rbp = rbp; }
 void *get_continuation(continuation *c) {
   void *rsp;
@@ -817,14 +823,14 @@ void *get_continuation(continuation *c) {
   c->rsp = rsp;
   c->stacklen = main_rbp - rsp + 1;
   c->stack = xmalloc(sizeof(char) * c->stacklen);
-  memmove(c->stack, c->rsp, c->stacklen);
+  MEMMOVE(c->stack, c->rsp, c->stacklen);
   if (setjmp(c->cont_reg) == 0)
     return NULL;
   else
     return e_expr;
 }
 void _cc(continuation *c, void *expr) {
-  memmove(c->rsp, c->stack, c->stacklen);
+  MEMMOVE(c->rsp, c->stack, c->stacklen);
   e_expr = expr;
   longjmp(c->cont_reg, 1);
 }
