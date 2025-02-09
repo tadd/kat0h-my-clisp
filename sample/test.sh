@@ -1,7 +1,5 @@
-#!/bin/sh
-
-make
-
+#!/bin/sh -eu
+set -v
 ./scm "`cat ./sample/callcc.scm`"
 ./scm "`cat ./sample/anonymous_recursion.scm`"
 ./scm "`cat ./sample/counter.scm`"

@@ -8,7 +8,7 @@ all: scm
 scm: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-test:
+test: scm
 	sample/test.sh
 
 %.o: %.c
