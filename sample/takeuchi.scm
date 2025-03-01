@@ -6,5 +6,4 @@
       (if (<= x y) 
         y
         (tarai (tarai (- x 1) y z) (tarai (- y 1) z x) (tarai (- z 1) x y))))))
-(tarai 7 6 0)
-(print count)
+(tarai 10 6 0)
